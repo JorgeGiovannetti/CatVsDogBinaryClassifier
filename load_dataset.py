@@ -41,7 +41,7 @@ def load_data(dataset):
             except Exception as e:
                 pass
 
-    output_array = np.array(dataset_array)
+    output_array = np.array(dataset_array, dtype=object)
 
     # shuffle dataset
     np.random.shuffle(output_array)
@@ -50,9 +50,21 @@ def load_data(dataset):
     x_output = np.array(output_array[:, 0])
     y_output = np.array(output_array[:, 1])
 
+    # Reshape arrays
+    x_output = np.stack(x_output)
+    y_output = y_output.reshape((1, y_output.shape[0]))
+
     return x_output, y_output, categories
 
 
 # Load Data Demo
-x, y, classes = load_data('dev_set')
-print('data[0]', x[0], classes[y[0]])
+train_x_orig, train_y, classes = load_data('dev_set')
+
+# Explore your dataset 
+m_train = train_x_orig.shape[0]
+num_px = train_x_orig.shape[1]
+
+print ("Number of training examples: " + str(m_train))
+print ("Each image is of size: (" + str(num_px) + ", " + str(num_px) + ", 3)")
+print ("train_x_orig shape: " + str(train_x_orig.shape))
+print ("train_y shape: " + str(train_y.shape))
