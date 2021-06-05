@@ -7,14 +7,15 @@ from tqdm import tqdm
 
 def load_data(dataset):
     """
-    Implement the backward propagation for a single SIGMOID unit.
+    Loads images from dataset and returns it in the desired format as numpy arrays
 
     Arguments:
-    dA -- post-activation gradient, of any shape
-    cache -- 'Z' where we store for computing backward propagation efficiently
+    dataset -- dataset folder (dev_set, test_set, or training_set)
 
     Returns:
-    x_output -- numpy array of features ()
+    x_output -- numpy array of features (num_samples, img_size, img_size, 3)
+    y_output -- numpy array of labels (1, num_samples)
+    categories -- array of label names
     """
 
     np.random.seed(1)
