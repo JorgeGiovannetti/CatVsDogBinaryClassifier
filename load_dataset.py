@@ -58,13 +58,13 @@ def load_data(dataset):
 
 
 # Load Data Demo
-train_x_orig, train_y, classes = load_data('dev_set')
+dev_x_orig, dev_y, classes = load_data('dev_set')
 
 # Explore your dataset 
-m_train = train_x_orig.shape[0]
-num_px = train_x_orig.shape[1]
+m_train = dev_x_orig.shape[0]
+num_px = dev_x_orig.shape[1]
 
-print ("Number of training examples: " + str(m_train))
+print ("Number of dev examples: " + str(m_train))
 print ("Each image is of size: (" + str(num_px) + ", " + str(num_px) + ", 3)")
-print ("train_x_orig shape: " + str(train_x_orig.shape))
-print ("train_y shape: " + str(train_y.shape))
+print ("dev_x_orig shape: " + str(dev_x_orig.shape))
+print ("dev_y shape: " + str(dev_y.shape))
