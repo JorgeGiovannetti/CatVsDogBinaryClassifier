@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 
 
-def load_data(dataset, img_size = 100):
+def load_data(dataset, img_size = 64):
     """
     Loads images from dataset and returns it in the desired format as numpy arrays
 
     Arguments:
     dataset -- dataset folder ('dev_set', 'test_set', or 'training_set')
-    img_size (default: 100) -- size to resize images
+    img_size (default: 64) -- size to resize images
 
     Returns:
     x_output -- numpy array of features (num_samples, img_size, img_size, 3)

@@ -441,7 +441,7 @@ def predict(X, y, parameters):
     return p
 
 
-def print_mislabeled_images(classes, X, y, p):
+def print_mislabeled_images(classes, X, y, p, img_size = 64):
     """
     Plots images where predictions and truth were different.
     X -- dataset
@@ -456,7 +456,7 @@ def print_mislabeled_images(classes, X, y, p):
         index = mislabeled_indices[1][i]
 
         plt.subplot(2, num_images, i + 1)
-        plt.imshow(X[:, index].reshape(64, 64, 3), interpolation='nearest')
+        plt.imshow(X[:, index].reshape(img_size, img_size, 3), interpolation='nearest')
         plt.axis('off')
         plt.title("Prediction: " + classes[int(p[0, index])].decode(
             "utf-8") + " \n Class: " + classes[y[0, index]].decode("utf-8"))
