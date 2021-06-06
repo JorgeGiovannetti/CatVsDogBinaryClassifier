@@ -86,25 +86,25 @@ def sigmoid_backward(dA, cache):
     return dZ
 
 
-def load_data():
-    train_dataset = h5py.File('datasets/train_catvnoncat.h5', "r")
-    # your train set features
-    train_set_x_orig = np.array(train_dataset["train_set_x"][:])
-    train_set_y_orig = np.array(
-        train_dataset["train_set_y"][:])  # your train set labels
+# def load_data():
+#     train_dataset = h5py.File('datasets/train_catvnoncat.h5', "r")
+#     # your train set features
+#     train_set_x_orig = np.array(train_dataset["train_set_x"][:])
+#     train_set_y_orig = np.array(
+#         train_dataset["train_set_y"][:])  # your train set labels
 
-    test_dataset = h5py.File('datasets/test_catvnoncat.h5', "r")
-    # your test set features
-    test_set_x_orig = np.array(test_dataset["test_set_x"][:])
-    test_set_y_orig = np.array(
-        test_dataset["test_set_y"][:])  # your test set labels
+#     test_dataset = h5py.File('datasets/test_catvnoncat.h5', "r")
+#     # your test set features
+#     test_set_x_orig = np.array(test_dataset["test_set_x"][:])
+#     test_set_y_orig = np.array(
+#         test_dataset["test_set_y"][:])  # your test set labels
 
-    classes = np.array(test_dataset["list_classes"][:])  # the list of classes
+#     classes = np.array(test_dataset["list_classes"][:])  # the list of classes
 
-    train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
-    test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
+#     train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
+#     test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
 
-    return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes
+#     return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes
 
 
 def initialize_parameters(n_x, n_h, n_y):
@@ -325,6 +325,7 @@ def linear_activation_backward(dA, cache, activation):
     dW -- Gradient of the cost with respect to W (current layer l), same shape as W
     db -- Gradient of the cost with respect to b (current layer l), same shape as b
     """
+
     linear_cache, activation_cache = cache
 
     if activation == "relu":
