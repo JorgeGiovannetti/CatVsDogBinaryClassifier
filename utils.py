@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import h5py
 
 
 def sigmoid(Z):
@@ -86,62 +85,6 @@ def sigmoid_backward(dA, cache):
     return dZ
 
 
-# def load_data():
-#     train_dataset = h5py.File('datasets/train_catvnoncat.h5', "r")
-#     # your train set features
-#     train_set_x_orig = np.array(train_dataset["train_set_x"][:])
-#     train_set_y_orig = np.array(
-#         train_dataset["train_set_y"][:])  # your train set labels
-
-#     test_dataset = h5py.File('datasets/test_catvnoncat.h5', "r")
-#     # your test set features
-#     test_set_x_orig = np.array(test_dataset["test_set_x"][:])
-#     test_set_y_orig = np.array(
-#         test_dataset["test_set_y"][:])  # your test set labels
-
-#     classes = np.array(test_dataset["list_classes"][:])  # the list of classes
-
-#     train_set_y_orig = train_set_y_orig.reshape((1, train_set_y_orig.shape[0]))
-#     test_set_y_orig = test_set_y_orig.reshape((1, test_set_y_orig.shape[0]))
-
-#     return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes
-
-
-def initialize_parameters(n_x, n_h, n_y):
-    """
-    Argument:
-    n_x -- size of the input layer
-    n_h -- size of the hidden layer
-    n_y -- size of the output layer
-
-    Returns:
-    parameters -- python dictionary containing your parameters:
-                    W1 -- weight matrix of shape (n_h, n_x)
-                    b1 -- bias vector of shape (n_h, 1)
-                    W2 -- weight matrix of shape (n_y, n_h)
-                    b2 -- bias vector of shape (n_y, 1)
-    """
-
-    np.random.seed(1)
-
-    W1 = np.random.randn(n_h, n_x)*0.01
-    b1 = np.zeros((n_h, 1))
-    W2 = np.random.randn(n_y, n_h)*0.01
-    b2 = np.zeros((n_y, 1))
-
-    assert(W1.shape == (n_h, n_x))
-    assert(b1.shape == (n_h, 1))
-    assert(W2.shape == (n_y, n_h))
-    assert(b2.shape == (n_y, 1))
-
-    parameters = {"W1": W1,
-                  "b1": b1,
-                  "W2": W2,
-                  "b2": b2}
-
-    return parameters
-
-
 def initialize_parameters_deep(layer_dims):
     """
     Arguments:
@@ -223,7 +166,7 @@ def linear_activation_forward(A_prev, W, b, activation):
     return A, cache
 
 
-def L_model_forward(X, parameters):
+def L_model_forward(X, parameters, activation_functions):
     """
     Implement forward propagation for the [LINEAR->RELU]*(L-1)->LINEAR->SIGMOID computation
 
@@ -247,12 +190,12 @@ def L_model_forward(X, parameters):
     for l in range(1, L):
         A_prev = A
         A, cache = linear_activation_forward(
-            A_prev, parameters['W' + str(l)], parameters['b' + str(l)], activation="relu")
+            A_prev, parameters['W' + str(l)], parameters['b' + str(l)], activation=activation_functions[l-1])
         caches.append(cache)
 
     # Implement LINEAR -> SIGMOID. Add "cache" to the "caches" list.
     AL, cache = linear_activation_forward(
-        A, parameters['W' + str(L)], parameters['b' + str(L)], activation="sigmoid")
+        A, parameters['W' + str(L)], parameters['b' + str(L)], activation=activation_functions[L-1])
     caches.append(cache)
 
     assert(AL.shape == (1, X.shape[1]))
@@ -339,16 +282,14 @@ def linear_activation_backward(dA, cache, activation):
     return dA_prev, dW, db
 
 
-def L_model_backward(AL, Y, caches):
+def L_model_backward(AL, Y, caches, activation_functions):
     """
     Implement the backward propagation for the [LINEAR->RELU] * (L-1) -> LINEAR -> SIGMOID group
 
     Arguments:
     AL -- probability vector, output of the forward propagation (L_model_forward())
     Y -- true "label" vector (containing 0 if non-cat, 1 if cat)
-    caches -- list of caches containing:
-                every cache of linear_activation_forward() with "relu" (there are (L-1) or them, indexes from 0 to L-2)
-                the cache of linear_activation_forward() with "sigmoid" (there is one, index L-1)
+    caches -- list of caches containing every cache of linear_activation_forward()
 
     Returns:
     grads -- A dictionary with the gradients
@@ -364,16 +305,14 @@ def L_model_backward(AL, Y, caches):
     # Initializing the backpropagation
     dAL = - (np.divide(Y, AL) - np.divide(1 - Y, 1 - AL))
 
-    # Lth layer (SIGMOID -> LINEAR) gradients. Inputs: "AL, Y, caches". Outputs: "grads["dAL"], grads["dWL"], grads["dbL"]
     current_cache = caches[L-1]
     grads["dA" + str(L-1)], grads["dW" + str(L)], grads["db" + str(L)
-                                                        ] = linear_activation_backward(dAL, current_cache, activation="sigmoid")
+                                                        ] = linear_activation_backward(dAL, current_cache, activation=activation_functions[L-1])
 
     for l in reversed(range(L-1)):
-        # lth layer: (RELU -> LINEAR) gradients.
         current_cache = caches[l]
         dA_prev_temp, dW_temp, db_temp = linear_activation_backward(
-            grads["dA" + str(l + 1)], current_cache, activation="relu")
+            grads["dA" + str(l + 1)], current_cache, activation=activation_functions[l])
         grads["dA" + str(l)] = dA_prev_temp
         grads["dW" + str(l + 1)] = dW_temp
         grads["db" + str(l + 1)] = db_temp
@@ -407,7 +346,7 @@ def update_parameters(parameters, grads, learning_rate):
     return parameters
 
 
-def predict(X, y, parameters):
+def predict(X, y, parameters, activation_functions):
     """
     This function is used to predict the results of a  L-layer neural network.
 
@@ -424,7 +363,7 @@ def predict(X, y, parameters):
     p = np.zeros((1, m))
 
     # Forward propagation
-    probas, caches = L_model_forward(X, parameters)
+    probas, caches = L_model_forward(X, parameters, activation_functions)
 
     # convert probas to 0/1 predictions
     for i in range(0, probas.shape[1]):
@@ -441,7 +380,7 @@ def predict(X, y, parameters):
     return p
 
 
-def print_mislabeled_images(classes, X, y, p, img_size = 64):
+def print_mislabeled_images(classes, X, y, p, img_size=64):
     """
     Plots images where predictions and truth were different.
     X -- dataset
@@ -456,7 +395,109 @@ def print_mislabeled_images(classes, X, y, p, img_size = 64):
         index = mislabeled_indices[1][i]
 
         plt.subplot(2, num_images, i + 1)
-        plt.imshow(X[:, index].reshape(img_size, img_size, 3), interpolation='nearest')
+        plt.imshow(X[:, index].reshape(img_size, img_size, 3),
+                   interpolation='nearest')
         plt.axis('off')
         plt.title("Prediction: " + classes[int(p[0, index])].decode(
             "utf-8") + " \n Class: " + classes[y[0, index]].decode("utf-8"))
+
+
+def dictionary_to_vector(params_dict):
+    """
+    Roll a dictionary into a single vector.
+
+    Arguments
+    ---------
+    params_dict : dict
+        learned parameters.
+
+    Returns
+    -------
+    params_vector : array
+        vector of all parameters concatenated.
+    """
+    count = 0
+    for key in params_dict.keys():
+        new_vector = np.reshape(params_dict[key], (-1, 1))
+        if count == 0:
+            theta_vector = new_vector
+        else:
+            theta_vector = np.concatenate((theta_vector, new_vector))
+        count += 1
+
+    return theta_vector
+
+
+def vector_to_dictionary(vector, layers_dims):
+    """
+    Unroll parameters vector to dictionary using layers dimensions.
+
+    Arguments
+    ---------
+    vector : array
+        parameters vector.
+    layers_dims : list or array_like
+        dimensions of each layer in the network.
+
+    Returns
+    -------
+    parameters : dict
+        dictionary storing all parameters.
+    """
+    L = len(layers_dims)
+    parameters = {}
+    k = 0
+
+    for l in range(1, L):
+        # Create temp variable to store dimension used on each layer
+        w_dim = layers_dims[l] * layers_dims[l - 1]
+        b_dim = layers_dims[l]
+
+        # Create temp var to be used in slicing parameters vector
+        temp_dim = k + w_dim
+
+        # add parameters to the dictionary
+        parameters["W" + str(l)] = vector[
+            k:temp_dim].reshape(layers_dims[l], layers_dims[l - 1])
+        parameters["b" + str(l)] = vector[
+            temp_dim:temp_dim + b_dim].reshape(b_dim, 1)
+
+        k += w_dim + b_dim
+
+    return parameters
+
+
+def gradients_to_vector(gradients):
+    """
+    Roll all gradients into a single vector containing only dW and db.
+
+    Arguments
+    ---------
+    gradients : dict
+        storing gradients of weights and biases for all layers: dA, dW, db.
+
+    Returns
+    -------
+    new_grads : array
+        vector of only dW and db gradients.
+    """
+    # Get the number of indices for the gradients to iterate over
+    valid_grads = [key for key in gradients.keys()
+                   if not key.startswith("dA")]
+    L = len(valid_grads) // 2
+    count = 0
+
+    # Iterate over all gradients and append them to new_grads list
+    for l in range(1, L + 1):
+        if count == 0:
+            new_grads = gradients["dW" + str(l)].reshape(-1, 1)
+            new_grads = np.concatenate(
+                (new_grads, gradients["db" + str(l)].reshape(-1, 1)))
+        else:
+            new_grads = np.concatenate(
+                (new_grads, gradients["dW" + str(l)].reshape(-1, 1)))
+            new_grads = np.concatenate(
+                (new_grads, gradients["db" + str(l)].reshape(-1, 1)))
+        count += 1
+
+    return new_grads
